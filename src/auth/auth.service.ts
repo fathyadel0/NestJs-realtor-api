@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateSignupDto } from './dto/create-signup.dto';
 import { verify, hash } from 'argon2';
@@ -83,7 +78,7 @@ export class AuthService {
     const user = await this.findByEmail(email);
 
     if (user) {
-      throw new BadRequestException('Email alreay taken!');
+      throw new ForbiddenException('Email alreay taken!');
     }
 
     const hashedPassword = await hash(password);
@@ -109,7 +104,7 @@ export class AuthService {
 
     const validPassword = await verify(user.password, password);
     if (!validPassword) {
-      throw new BadRequestException('Password is not valid');
+      throw new ForbiddenException('Password is not valid');
     }
 
     const accessToken = await this.signAccessToken(user.id, email);
@@ -161,8 +156,3 @@ export class AuthService {
     return { productKey: hashedProductKey };
   }
 }
-
-// contact to admin that you wanna be realtor
-// admin gives you product key based on your email and type
-// you store the product key in the state
-// you signup with the product key
