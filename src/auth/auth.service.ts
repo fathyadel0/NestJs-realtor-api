@@ -21,16 +21,16 @@ export class AuthService {
     return await this.prisma.user.findUnique({ where: { email } });
   }
 
-  async signAccessToken(userId: number, email: string): Promise<string> {
-    const payload = { id: userId, email };
+  async signAccessToken(userId: number, email: string, type: UserType): Promise<string> {
+    const payload = { id: userId, email, type };
     return await this.jwt.signAsync(payload, {
       secret: this.config.getOrThrow('ACCESS_TOKEN_SECRET'),
       expiresIn: 60 * 15,
     });
   }
 
-  async signRefreshToken(userId: number, email: string): Promise<string> {
-    const payload = { id: userId, email };
+  async signRefreshToken(userId: number, email: string, type: UserType): Promise<string> {
+    const payload = { id: userId, email, type };
     return await this.jwt.signAsync(payload, {
       secret: this.config.getOrThrow('REFRESH_TOKEN_SECRET'),
       expiresIn: 60 * 60 * 24 * 7,
@@ -107,8 +107,8 @@ export class AuthService {
       throw new ForbiddenException('Password is not valid');
     }
 
-    const accessToken = await this.signAccessToken(user.id, email);
-    const refreshToken = await this.signRefreshToken(user.id, email);
+    const accessToken = await this.signAccessToken(user.id, email, user.type);
+    const refreshToken = await this.signRefreshToken(user.id, email, user.type);
 
     await this.signCookies(response, accessToken, refreshToken);
     await this.updateRefreshToken(user.id, refreshToken);
@@ -140,8 +140,8 @@ export class AuthService {
       throw new ForbiddenException('Token is not valid');
     }
 
-    const accessToken = await this.signAccessToken(user.id, user.email);
-    const refreshToken = await this.signRefreshToken(user.id, user.email);
+    const accessToken = await this.signAccessToken(user.id, user.email, user.type);
+    const refreshToken = await this.signRefreshToken(user.id, user.email, user.type);
 
     await this.signCookies(response, accessToken, refreshToken);
     await this.updateRefreshToken(decoded.id, refreshToken);

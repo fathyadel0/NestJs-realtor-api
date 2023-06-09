@@ -4,6 +4,7 @@ import { CreateHomeDto } from './dto/create-home.dto';
 import { HomeReponseDto } from './dto/home-response.dto';
 import { UpdateHomeDto } from './dto/update-home.dto';
 import { QueryHomeDto } from './dto/query-home.dto';
+import { DecodedUser } from 'src/auth/decorator/user.decorator';
 
 @Injectable()
 export class HomeService {
@@ -49,7 +50,7 @@ export class HomeService {
     return home;
   }
 
-  async create(homeData: CreateHomeDto): Promise<HomeReponseDto> {
+  async create(homeData: CreateHomeDto, user: DecodedUser): Promise<HomeReponseDto> {
     const home = await this.prisma.home.create({
       data: {
         address: homeData.address,
@@ -59,6 +60,7 @@ export class HomeService {
         price: homeData.price,
         landSize: homeData.landSize,
         propertyType: homeData.propertyType,
+        userId: user.id,
       },
       select: this.selectedData,
     });
@@ -68,8 +70,6 @@ export class HomeService {
     });
 
     await this.prisma.image.createMany({ data: homeImages });
-
-    home.images.push(...homeImages);
 
     return home;
   }
@@ -95,5 +95,10 @@ export class HomeService {
     await this.getOne(id);
     await this.prisma.image.deleteMany({ where: { homeId: id } });
     return await this.prisma.home.delete({ where: { id }, select: this.selectedData });
+  }
+
+  async getUserIdByHomeId(id: number) {
+    const home = await this.prisma.home.findUnique({ where: { id } });
+    return home.userId;
   }
 }

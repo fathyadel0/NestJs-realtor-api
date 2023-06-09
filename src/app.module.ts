@@ -8,7 +8,13 @@ import { HomeModule } from './home/home.module';
 import { ImageModule } from './image/image.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule, PrismaModule, HomeModule, ImageModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    PrismaModule,
+    HomeModule,
+    ImageModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

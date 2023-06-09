@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../auth.service';
+import { UserType } from '@prisma/client';
 
 @Injectable()
 export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
@@ -21,7 +22,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     return null;
   }
 
-  async validate(payload: { id: number; email: string }) {
+  async validate(payload: { id: number; email: string; type: UserType }) {
     const { email } = payload;
     const user = await this.authService.findByEmail(email);
     if (!user) {

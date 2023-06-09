@@ -1,10 +1,10 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from '../auth.service';
+import { UserType } from '@prisma/client';
 
 @Injectable()
 export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -22,12 +22,13 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     return null;
   }
 
-  async validate(payload: { id: number; email: string }) {
+  async validate(payload: { id: number; email: string; type: UserType }) {
     const { email } = payload;
     const user = await this.authService.findByEmail(email);
     if (!user) {
       throw new ForbiddenException('Token is not valid');
     }
+
     return payload;
   }
 }
